@@ -1,0 +1,1170 @@
+2023/06/16 13:33:52 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.8.16 | packaged by conda-forge | (default, Feb  1 2023, 16:01:55) [GCC 11.3.0]
+    CUDA available: True
+    numpy_random_seed: 1618656443
+    GPU 0: NVIDIA GeForce RTX 2080 Ti
+    CUDA_HOME: /usr/local/cuda
+    NVCC: Cuda compilation tools, release 11.3, V11.3.58
+    GCC: gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0
+    PyTorch: 2.0.1+cu117
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201703
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.7.3 (Git Hash 6dbeffbae1f23cbbeae17adb7b5b13f1f37c080e)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.0.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=1, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.11.0
+    OpenCV: 4.7.0
+    MMEngine: 0.7.4
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 1618656443
+    Distributed launcher: none
+    Distributed training: False
+    GPU number: 1
+------------------------------------------------------------
+
+2023/06/16 13:33:52 - mmengine - INFO - Config:
+norm_cfg = dict(type='SyncBN', requires_grad=True)
+data_preprocessor = dict(
+    type='SegDataPreProcessor',
+    mean=[123.675, 116.28, 103.53],
+    std=[58.395, 57.12, 57.375],
+    bgr_to_rgb=True,
+    pad_val=0,
+    seg_pad_val=255,
+    size=(512, 512))
+model = dict(
+    type='EncoderDecoder',
+    data_preprocessor=dict(
+        type='SegDataPreProcessor',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        bgr_to_rgb=True,
+        pad_val=0,
+        seg_pad_val=255,
+        size=(512, 512)),
+    pretrained='open-mmlab://resnet50_v1c',
+    backbone=dict(
+        type='ResNetV1c',
+        depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        dilations=(1, 1, 2, 4),
+        strides=(1, 2, 1, 1),
+        norm_cfg=dict(type='SyncBN', requires_grad=True),
+        norm_eval=False,
+        style='pytorch',
+        contract_dilation=True),
+    decode_head=dict(
+        type='PSPHead',
+        in_channels=2048,
+        in_index=3,
+        channels=512,
+        pool_scales=(1, 2, 3, 6),
+        dropout_ratio=0.1,
+        num_classes=6,
+        norm_cfg=dict(type='SyncBN', requires_grad=True),
+        align_corners=False,
+        loss_decode=dict(
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+    auxiliary_head=dict(
+        type='FCNHead',
+        in_channels=1024,
+        in_index=2,
+        channels=256,
+        num_convs=1,
+        concat_input=False,
+        dropout_ratio=0.1,
+        num_classes=6,
+        norm_cfg=dict(type='SyncBN', requires_grad=True),
+        align_corners=False,
+        loss_decode=dict(
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+    train_cfg=dict(),
+    test_cfg=dict(mode='whole'))
+dataset_type = 'COCOStuffDataset'
+data_root = 'data/Watermelon87_Semantic_Seg_Mask'
+crop_size = (512, 512)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        type='RandomResize',
+        scale=(2048, 512),
+        ratio_range=(0.5, 2.0),
+        keep_ratio=True),
+    dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+    dict(type='RandomFlip', prob=0.5),
+    dict(type='PhotoMetricDistortion'),
+    dict(type='PackSegInputs')
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=(2048, 512), keep_ratio=True),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs')
+]
+img_ratios = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
+tta_pipeline = [
+    dict(type='LoadImageFromFile', backend_args=None),
+    dict(
+        type='TestTimeAug',
+        transforms=[[{
+            'type': 'Resize',
+            'scale_factor': 0.5,
+            'keep_ratio': True
+        }, {
+            'type': 'Resize',
+            'scale_factor': 0.75,
+            'keep_ratio': True
+        }, {
+            'type': 'Resize',
+            'scale_factor': 1.0,
+            'keep_ratio': True
+        }, {
+            'type': 'Resize',
+            'scale_factor': 1.25,
+            'keep_ratio': True
+        }, {
+            'type': 'Resize',
+            'scale_factor': 1.5,
+            'keep_ratio': True
+        }, {
+            'type': 'Resize',
+            'scale_factor': 1.75,
+            'keep_ratio': True
+        }],
+                    [{
+                        'type': 'RandomFlip',
+                        'prob': 0.0,
+                        'direction': 'horizontal'
+                    }, {
+                        'type': 'RandomFlip',
+                        'prob': 1.0,
+                        'direction': 'horizontal'
+                    }], [{
+                        'type': 'LoadAnnotations'
+                    }], [{
+                        'type': 'PackSegInputs'
+                    }]])
+]
+train_dataloader = dict(
+    batch_size=4,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='InfiniteSampler', shuffle=True),
+    dataset=dict(
+        type='COCOStuffDataset',
+        data_root='data/Watermelon87_Semantic_Seg_Mask',
+        data_prefix=dict(
+            img_path='img_dir/train', seg_map_path='ann_dir/train'),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations'),
+            dict(
+                type='RandomResize',
+                scale=(2048, 512),
+                ratio_range=(0.5, 2.0),
+                keep_ratio=True),
+            dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+            dict(type='RandomFlip', prob=0.5),
+            dict(type='PhotoMetricDistortion'),
+            dict(type='PackSegInputs')
+        ]))
+val_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type='COCOStuffDataset',
+        data_root='data/Watermelon87_Semantic_Seg_Mask',
+        data_prefix=dict(img_path='img_dir/val', seg_map_path='ann_dir/val'),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='Resize', scale=(2048, 512), keep_ratio=True),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs')
+        ]))
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type='COCOStuffDataset',
+        data_root='data/Watermelon87_Semantic_Seg_Mask',
+        data_prefix=dict(img_path='img_dir/val', seg_map_path='ann_dir/val'),
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='Resize', scale=(2048, 512), keep_ratio=True),
+            dict(type='LoadAnnotations'),
+            dict(type='PackSegInputs')
+        ]))
+val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
+test_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
+    dist_cfg=dict(backend='nccl'))
+vis_backends = [dict(type='LocalVisBackend')]
+visualizer = dict(
+    type='SegLocalVisualizer',
+    vis_backends=[dict(type='LocalVisBackend')],
+    name='visualizer')
+log_processor = dict(by_epoch=False)
+log_level = 'INFO'
+load_from = None
+resume = False
+tta_model = dict(type='SegTTAModel')
+optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005),
+    clip_grad=None)
+param_scheduler = [
+    dict(
+        type='PolyLR',
+        eta_min=0.0001,
+        power=0.9,
+        begin=0,
+        end=20000,
+        by_epoch=False)
+]
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=20000, val_interval=2000)
+val_cfg = dict(type='ValLoop')
+test_cfg = dict(type='TestLoop')
+default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=200, log_metric_by_epoch=False),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', by_epoch=False, interval=2000),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    visualization=dict(type='SegVisualizationHook'))
+launcher = 'none'
+work_dir = 'work_dirs/water5/pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water'
+
+2023/06/16 13:33:54 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+2023/06/16 13:33:54 - mmengine - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+before_train:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) DistSamplerSeedHook                
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) IterTimerHook                      
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_val_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_val_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+(LOW         ) ParamSchedulerHook                 
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+after_train:
+(VERY_LOW    ) CheckpointHook                     
+ -------------------- 
+before_test_epoch:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+before_test_iter:
+(NORMAL      ) IterTimerHook                      
+ -------------------- 
+after_test_iter:
+(NORMAL      ) IterTimerHook                      
+(NORMAL      ) SegVisualizationHook               
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_test_epoch:
+(VERY_HIGH   ) RuntimeInfoHook                    
+(NORMAL      ) IterTimerHook                      
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+after_run:
+(BELOW_NORMAL) LoggerHook                         
+ -------------------- 
+2023/06/16 13:33:55 - mmengine - WARNING - The prefix is not set in metric class IoUMetric.
+2023/06/16 13:33:55 - mmengine - INFO - load model from: open-mmlab://resnet50_v1c
+2023/06/16 13:33:55 - mmengine - INFO - Loads checkpoint by openmmlab backend from path: open-mmlab://resnet50_v1c
+2023/06/16 13:33:55 - mmengine - WARNING - The model and loaded state dict do not match exactly
+
+unexpected key in source state_dict: fc.weight, fc.bias
+
+Name of parameter - Initialization information
+
+backbone.stem.0.weight - torch.Size([32, 3, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.1.weight - torch.Size([32]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.1.bias - torch.Size([32]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.3.weight - torch.Size([32, 32, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.4.weight - torch.Size([32]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.4.bias - torch.Size([32]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.6.weight - torch.Size([64, 32, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.7.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.stem.7.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.conv1.weight - torch.Size([64, 64, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.bn1.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.bn1.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.conv2.weight - torch.Size([64, 64, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.bn2.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.bn2.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.conv3.weight - torch.Size([256, 64, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.bn3.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.bn3.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.downsample.0.weight - torch.Size([256, 64, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.downsample.1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.0.downsample.1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.conv1.weight - torch.Size([64, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.bn1.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.bn1.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.conv2.weight - torch.Size([64, 64, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.bn2.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.bn2.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.conv3.weight - torch.Size([256, 64, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.bn3.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.1.bn3.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.conv1.weight - torch.Size([64, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.bn1.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.bn1.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.conv2.weight - torch.Size([64, 64, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.bn2.weight - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.bn2.bias - torch.Size([64]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.conv3.weight - torch.Size([256, 64, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.bn3.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer1.2.bn3.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.conv1.weight - torch.Size([128, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.bn1.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.bn1.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.conv2.weight - torch.Size([128, 128, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.bn2.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.bn2.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.conv3.weight - torch.Size([512, 128, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.bn3.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.bn3.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.downsample.0.weight - torch.Size([512, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.downsample.1.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.0.downsample.1.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.conv1.weight - torch.Size([128, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.bn1.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.bn1.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.conv2.weight - torch.Size([128, 128, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.bn2.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.bn2.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.conv3.weight - torch.Size([512, 128, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.bn3.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.1.bn3.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.conv1.weight - torch.Size([128, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.bn1.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.bn1.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.conv2.weight - torch.Size([128, 128, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.bn2.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.bn2.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.conv3.weight - torch.Size([512, 128, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.bn3.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.2.bn3.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.conv1.weight - torch.Size([128, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.bn1.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.bn1.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.conv2.weight - torch.Size([128, 128, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.bn2.weight - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.bn2.bias - torch.Size([128]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.conv3.weight - torch.Size([512, 128, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.bn3.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer2.3.bn3.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.conv1.weight - torch.Size([256, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.bn1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.bn1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.conv2.weight - torch.Size([256, 256, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.bn2.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.bn2.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.bn3.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.bn3.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.downsample.0.weight - torch.Size([1024, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.downsample.1.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.0.downsample.1.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.bn1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.bn1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.conv2.weight - torch.Size([256, 256, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.bn2.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.bn2.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.bn3.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.1.bn3.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.bn1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.bn1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.conv2.weight - torch.Size([256, 256, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.bn2.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.bn2.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.bn3.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.2.bn3.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.bn1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.bn1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.conv2.weight - torch.Size([256, 256, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.bn2.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.bn2.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.bn3.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.3.bn3.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.bn1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.bn1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.conv2.weight - torch.Size([256, 256, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.bn2.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.bn2.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.bn3.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.4.bn3.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.conv1.weight - torch.Size([256, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.bn1.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.bn1.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.conv2.weight - torch.Size([256, 256, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.bn2.weight - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.bn2.bias - torch.Size([256]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.conv3.weight - torch.Size([1024, 256, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.bn3.weight - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer3.5.bn3.bias - torch.Size([1024]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.conv1.weight - torch.Size([512, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.bn1.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.bn1.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.conv2.weight - torch.Size([512, 512, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.bn2.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.bn2.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.bn3.weight - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.bn3.bias - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.downsample.0.weight - torch.Size([2048, 1024, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.downsample.1.weight - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.0.downsample.1.bias - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.conv1.weight - torch.Size([512, 2048, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.bn1.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.bn1.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.conv2.weight - torch.Size([512, 512, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.bn2.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.bn2.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.bn3.weight - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.1.bn3.bias - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.conv1.weight - torch.Size([512, 2048, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.bn1.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.bn1.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.conv2.weight - torch.Size([512, 512, 3, 3]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.bn2.weight - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.bn2.bias - torch.Size([512]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.conv3.weight - torch.Size([2048, 512, 1, 1]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.bn3.weight - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+backbone.layer4.2.bn3.bias - torch.Size([2048]): 
+PretrainedInit: load from open-mmlab://resnet50_v1c 
+
+decode_head.conv_seg.weight - torch.Size([6, 512, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+decode_head.conv_seg.bias - torch.Size([6]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+decode_head.psp_modules.0.1.conv.weight - torch.Size([512, 2048, 1, 1]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.0.1.bn.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.0.1.bn.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.1.1.conv.weight - torch.Size([512, 2048, 1, 1]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.1.1.bn.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.1.1.bn.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.2.1.conv.weight - torch.Size([512, 2048, 1, 1]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.2.1.bn.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.2.1.bn.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.3.1.conv.weight - torch.Size([512, 2048, 1, 1]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.3.1.bn.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.psp_modules.3.1.bn.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.bottleneck.conv.weight - torch.Size([512, 4096, 3, 3]): 
+Initialized by user-defined `init_weights` in ConvModule  
+
+decode_head.bottleneck.bn.weight - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+decode_head.bottleneck.bn.bias - torch.Size([512]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+auxiliary_head.conv_seg.weight - torch.Size([6, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+auxiliary_head.conv_seg.bias - torch.Size([6]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+auxiliary_head.convs.0.conv.weight - torch.Size([256, 1024, 3, 3]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+auxiliary_head.convs.0.bn.weight - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+
+auxiliary_head.convs.0.bn.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of EncoderDecoder  
+2023/06/16 13:33:55 - mmengine - WARNING - "FileClient" will be deprecated in future. Please use io functions in https://mmengine.readthedocs.io/en/latest/api/fileio.html#file-io
+2023/06/16 13:33:55 - mmengine - WARNING - "HardDiskBackend" is the alias of "LocalBackend" and the former will be deprecated in future.
+2023/06/16 13:33:55 - mmengine - INFO - Checkpoints will be saved to /workspace/mmsegmentation/work_dirs/water5/pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water.
+2023/06/16 13:34:14 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 13:34:14 - mmengine - INFO - Iter(train) [   12/20000]  lr: 9.9951e-03  eta: 8:38:52  time: 0.4915  data_time: 0.0060  memory: 7613  loss: 1.5120  decode.loss_ce: 1.0191  decode.acc_seg: 84.6714  aux.loss_ce: 0.4929  aux.acc_seg: 64.6799
+2023/06/16 13:35:47 - mmengine - INFO - Iter(train) [  200/20000]  lr: 9.9113e-03  eta: 3:04:39  time: 0.5022  data_time: 0.0065  memory: 5932  loss: 0.3176  decode.loss_ce: 0.2134  decode.acc_seg: 89.7204  aux.loss_ce: 0.1043  aux.acc_seg: 90.7665
+2023/06/16 13:37:28 - mmengine - INFO - Iter(train) [  400/20000]  lr: 9.8221e-03  eta: 2:53:30  time: 0.5029  data_time: 0.0055  memory: 5932  loss: 0.2424  decode.loss_ce: 0.1633  decode.acc_seg: 96.8095  aux.loss_ce: 0.0791  aux.acc_seg: 96.4219
+2023/06/16 13:39:09 - mmengine - INFO - Iter(train) [  600/20000]  lr: 9.7327e-03  eta: 2:48:53  time: 0.5055  data_time: 0.0061  memory: 5932  loss: 0.2260  decode.loss_ce: 0.1403  decode.acc_seg: 94.0962  aux.loss_ce: 0.0857  aux.acc_seg: 93.5381
+2023/06/16 13:40:49 - mmengine - INFO - Iter(train) [  800/20000]  lr: 9.6433e-03  eta: 2:45:42  time: 0.5032  data_time: 0.0050  memory: 5932  loss: 0.1266  decode.loss_ce: 0.0816  decode.acc_seg: 96.7405  aux.loss_ce: 0.0450  aux.acc_seg: 95.8255
+2023/06/16 13:42:30 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 13:42:30 - mmengine - INFO - Iter(train) [ 1000/20000]  lr: 9.5538e-03  eta: 2:43:06  time: 0.5048  data_time: 0.0056  memory: 5932  loss: 0.1696  decode.loss_ce: 0.1103  decode.acc_seg: 97.3653  aux.loss_ce: 0.0593  aux.acc_seg: 97.3685
+2023/06/16 13:44:11 - mmengine - INFO - Iter(train) [ 1200/20000]  lr: 9.4642e-03  eta: 2:40:48  time: 0.5033  data_time: 0.0053  memory: 5932  loss: 0.1080  decode.loss_ce: 0.0711  decode.acc_seg: 98.0853  aux.loss_ce: 0.0369  aux.acc_seg: 98.0359
+2023/06/16 13:45:52 - mmengine - INFO - Iter(train) [ 1400/20000]  lr: 9.3745e-03  eta: 2:38:43  time: 0.5053  data_time: 0.0061  memory: 5932  loss: 0.1095  decode.loss_ce: 0.0716  decode.acc_seg: 97.4004  aux.loss_ce: 0.0379  aux.acc_seg: 96.6604
+2023/06/16 13:47:33 - mmengine - INFO - Iter(train) [ 1600/20000]  lr: 9.2847e-03  eta: 2:36:43  time: 0.5044  data_time: 0.0059  memory: 5932  loss: 0.0919  decode.loss_ce: 0.0571  decode.acc_seg: 97.5946  aux.loss_ce: 0.0348  aux.acc_seg: 97.1506
+2023/06/16 13:49:14 - mmengine - INFO - Iter(train) [ 1800/20000]  lr: 9.1948e-03  eta: 2:34:47  time: 0.5049  data_time: 0.0063  memory: 5932  loss: 0.0867  decode.loss_ce: 0.0561  decode.acc_seg: 97.7681  aux.loss_ce: 0.0306  aux.acc_seg: 97.5915
+2023/06/16 13:50:55 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 13:50:55 - mmengine - INFO - Iter(train) [ 2000/20000]  lr: 9.1048e-03  eta: 2:32:54  time: 0.5046  data_time: 0.0059  memory: 5932  loss: 0.0921  decode.loss_ce: 0.0583  decode.acc_seg: 98.3183  aux.loss_ce: 0.0338  aux.acc_seg: 97.7790
+2023/06/16 13:50:55 - mmengine - INFO - Saving checkpoint at 2000 iterations
+2023/06/16 13:51:08 - mmengine - INFO - per class results:
+2023/06/16 13:51:08 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 97.12 | 97.96 |
+|   green    | 94.37 | 98.45 |
+|   white    | 87.86 | 94.18 |
+| seed-black | 81.65 | 89.71 |
+| seed-white | 60.58 | 72.55 |
+| Unlabeled  | 37.03 | 44.58 |
++------------+-------+-------+
+2023/06/16 13:51:08 - mmengine - INFO - Iter(val) [11/11]    aAcc: 97.0200  mIoU: 76.4400  mAcc: 82.9000  data_time: 0.0159  time: 0.9397
+2023/06/16 13:52:48 - mmengine - INFO - Iter(train) [ 2200/20000]  lr: 9.0147e-03  eta: 2:31:01  time: 0.5041  data_time: 0.0059  memory: 8919  loss: 0.1090  decode.loss_ce: 0.0704  decode.acc_seg: 97.7260  aux.loss_ce: 0.0385  aux.acc_seg: 97.1339
+2023/06/16 13:54:29 - mmengine - INFO - Iter(train) [ 2400/20000]  lr: 8.9245e-03  eta: 2:29:12  time: 0.5032  data_time: 0.0052  memory: 5933  loss: 0.0950  decode.loss_ce: 0.0612  decode.acc_seg: 98.2890  aux.loss_ce: 0.0338  aux.acc_seg: 98.1032
+2023/06/16 13:56:10 - mmengine - INFO - Iter(train) [ 2600/20000]  lr: 8.8342e-03  eta: 2:27:25  time: 0.5049  data_time: 0.0059  memory: 5933  loss: 0.0692  decode.loss_ce: 0.0448  decode.acc_seg: 97.4579  aux.loss_ce: 0.0244  aux.acc_seg: 96.1540
+2023/06/16 13:57:51 - mmengine - INFO - Iter(train) [ 2800/20000]  lr: 8.7438e-03  eta: 2:25:38  time: 0.5048  data_time: 0.0059  memory: 5933  loss: 0.0766  decode.loss_ce: 0.0504  decode.acc_seg: 97.3273  aux.loss_ce: 0.0262  aux.acc_seg: 96.0977
+2023/06/16 13:59:32 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 13:59:32 - mmengine - INFO - Iter(train) [ 3000/20000]  lr: 8.6533e-03  eta: 2:23:53  time: 0.5055  data_time: 0.0061  memory: 5933  loss: 0.0656  decode.loss_ce: 0.0441  decode.acc_seg: 97.8167  aux.loss_ce: 0.0215  aux.acc_seg: 97.4245
+2023/06/16 14:01:13 - mmengine - INFO - Iter(train) [ 3200/20000]  lr: 8.5626e-03  eta: 2:22:08  time: 0.5038  data_time: 0.0055  memory: 5933  loss: 0.1204  decode.loss_ce: 0.0759  decode.acc_seg: 98.3621  aux.loss_ce: 0.0445  aux.acc_seg: 98.1410
+2023/06/16 14:02:54 - mmengine - INFO - Iter(train) [ 3400/20000]  lr: 8.4719e-03  eta: 2:20:23  time: 0.5040  data_time: 0.0054  memory: 5933  loss: 0.0673  decode.loss_ce: 0.0438  decode.acc_seg: 98.3963  aux.loss_ce: 0.0235  aux.acc_seg: 98.2407
+2023/06/16 14:04:35 - mmengine - INFO - Iter(train) [ 3600/20000]  lr: 8.3811e-03  eta: 2:18:39  time: 0.5047  data_time: 0.0060  memory: 5933  loss: 0.0609  decode.loss_ce: 0.0390  decode.acc_seg: 98.5246  aux.loss_ce: 0.0218  aux.acc_seg: 98.4105
+2023/06/16 14:06:15 - mmengine - INFO - Iter(train) [ 3800/20000]  lr: 8.2901e-03  eta: 2:16:55  time: 0.5034  data_time: 0.0054  memory: 5933  loss: 0.0591  decode.loss_ce: 0.0395  decode.acc_seg: 98.2133  aux.loss_ce: 0.0195  aux.acc_seg: 97.9861
+2023/06/16 14:07:56 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:07:56 - mmengine - INFO - Iter(train) [ 4000/20000]  lr: 8.1991e-03  eta: 2:15:11  time: 0.5035  data_time: 0.0058  memory: 5933  loss: 0.0612  decode.loss_ce: 0.0412  decode.acc_seg: 98.3332  aux.loss_ce: 0.0201  aux.acc_seg: 98.0935
+2023/06/16 14:07:56 - mmengine - INFO - Saving checkpoint at 4000 iterations
+2023/06/16 14:07:58 - mmengine - INFO - per class results:
+2023/06/16 14:07:58 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     |  97.3 |  98.3 |
+|   green    | 94.69 | 98.01 |
+|   white    | 88.38 | 94.13 |
+| seed-black | 82.69 | 90.95 |
+| seed-white | 64.39 | 73.88 |
+| Unlabeled  |  43.1 | 51.53 |
++------------+-------+-------+
+2023/06/16 14:07:58 - mmengine - INFO - Iter(val) [11/11]    aAcc: 97.2100  mIoU: 78.4200  mAcc: 84.4700  data_time: 0.0076  time: 0.0530
+2023/06/16 14:09:38 - mmengine - INFO - Iter(train) [ 4200/20000]  lr: 8.1079e-03  eta: 2:13:27  time: 0.5032  data_time: 0.0058  memory: 5933  loss: 0.0626  decode.loss_ce: 0.0405  decode.acc_seg: 98.2975  aux.loss_ce: 0.0221  aux.acc_seg: 97.8674
+2023/06/16 14:11:19 - mmengine - INFO - Iter(train) [ 4400/20000]  lr: 8.0166e-03  eta: 2:11:43  time: 0.5036  data_time: 0.0055  memory: 5933  loss: 0.0605  decode.loss_ce: 0.0399  decode.acc_seg: 98.0328  aux.loss_ce: 0.0206  aux.acc_seg: 97.4143
+2023/06/16 14:13:00 - mmengine - INFO - Iter(train) [ 4600/20000]  lr: 7.9252e-03  eta: 2:10:01  time: 0.5062  data_time: 0.0067  memory: 5933  loss: 0.0624  decode.loss_ce: 0.0420  decode.acc_seg: 98.2120  aux.loss_ce: 0.0204  aux.acc_seg: 97.9850
+2023/06/16 14:14:41 - mmengine - INFO - Iter(train) [ 4800/20000]  lr: 7.8337e-03  eta: 2:08:18  time: 0.5038  data_time: 0.0057  memory: 5933  loss: 0.0676  decode.loss_ce: 0.0439  decode.acc_seg: 98.1510  aux.loss_ce: 0.0237  aux.acc_seg: 97.9508
+2023/06/16 14:16:22 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:16:22 - mmengine - INFO - Iter(train) [ 5000/20000]  lr: 7.7421e-03  eta: 2:06:35  time: 0.5057  data_time: 0.0062  memory: 5933  loss: 0.0673  decode.loss_ce: 0.0447  decode.acc_seg: 98.4289  aux.loss_ce: 0.0226  aux.acc_seg: 98.2080
+2023/06/16 14:18:03 - mmengine - INFO - Iter(train) [ 5200/20000]  lr: 7.6503e-03  eta: 2:04:53  time: 0.5033  data_time: 0.0055  memory: 5933  loss: 0.0645  decode.loss_ce: 0.0428  decode.acc_seg: 98.5378  aux.loss_ce: 0.0217  aux.acc_seg: 98.3071
+2023/06/16 14:19:44 - mmengine - INFO - Iter(train) [ 5400/20000]  lr: 7.5584e-03  eta: 2:03:11  time: 0.5048  data_time: 0.0065  memory: 5933  loss: 0.0502  decode.loss_ce: 0.0336  decode.acc_seg: 98.2086  aux.loss_ce: 0.0166  aux.acc_seg: 97.8298
+2023/06/16 14:21:24 - mmengine - INFO - Iter(train) [ 5600/20000]  lr: 7.4664e-03  eta: 2:01:28  time: 0.5047  data_time: 0.0063  memory: 5933  loss: 0.0574  decode.loss_ce: 0.0382  decode.acc_seg: 98.5445  aux.loss_ce: 0.0191  aux.acc_seg: 98.3746
+2023/06/16 14:23:05 - mmengine - INFO - Iter(train) [ 5800/20000]  lr: 7.3742e-03  eta: 1:59:47  time: 0.5069  data_time: 0.0069  memory: 5933  loss: 0.0615  decode.loss_ce: 0.0386  decode.acc_seg: 98.4967  aux.loss_ce: 0.0229  aux.acc_seg: 98.1380
+2023/06/16 14:24:46 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:24:46 - mmengine - INFO - Iter(train) [ 6000/20000]  lr: 7.2820e-03  eta: 1:58:05  time: 0.5027  data_time: 0.0051  memory: 5933  loss: 0.0508  decode.loss_ce: 0.0333  decode.acc_seg: 98.7202  aux.loss_ce: 0.0175  aux.acc_seg: 98.5348
+2023/06/16 14:24:46 - mmengine - INFO - Saving checkpoint at 6000 iterations
+2023/06/16 14:24:48 - mmengine - INFO - per class results:
+2023/06/16 14:24:48 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 95.99 | 97.06 |
+|   green    | 94.94 | 98.01 |
+|   white    | 79.91 |  94.0 |
+| seed-black |  82.2 |  90.0 |
+| seed-white | 64.11 | 79.71 |
+| Unlabeled  |  42.6 | 54.28 |
++------------+-------+-------+
+2023/06/16 14:24:48 - mmengine - INFO - Iter(val) [11/11]    aAcc: 96.4400  mIoU: 76.6300  mAcc: 85.5100  data_time: 0.0070  time: 0.0525
+2023/06/16 14:26:29 - mmengine - INFO - Iter(train) [ 6200/20000]  lr: 7.1896e-03  eta: 1:56:23  time: 0.5042  data_time: 0.0058  memory: 5933  loss: 0.0525  decode.loss_ce: 0.0343  decode.acc_seg: 98.6182  aux.loss_ce: 0.0181  aux.acc_seg: 98.4817
+2023/06/16 14:28:10 - mmengine - INFO - Iter(train) [ 6400/20000]  lr: 7.0970e-03  eta: 1:54:41  time: 0.5031  data_time: 0.0053  memory: 5933  loss: 0.0615  decode.loss_ce: 0.0348  decode.acc_seg: 98.2453  aux.loss_ce: 0.0268  aux.acc_seg: 94.5154
+2023/06/16 14:29:51 - mmengine - INFO - Iter(train) [ 6600/20000]  lr: 7.0043e-03  eta: 1:52:59  time: 0.5031  data_time: 0.0054  memory: 5933  loss: 0.0484  decode.loss_ce: 0.0324  decode.acc_seg: 98.7640  aux.loss_ce: 0.0159  aux.acc_seg: 98.4423
+2023/06/16 14:31:31 - mmengine - INFO - Iter(train) [ 6800/20000]  lr: 6.9115e-03  eta: 1:51:17  time: 0.5037  data_time: 0.0053  memory: 5933  loss: 0.0475  decode.loss_ce: 0.0316  decode.acc_seg: 98.4181  aux.loss_ce: 0.0159  aux.acc_seg: 98.1999
+2023/06/16 14:33:12 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:33:12 - mmengine - INFO - Iter(train) [ 7000/20000]  lr: 6.8186e-03  eta: 1:49:35  time: 0.5036  data_time: 0.0059  memory: 5933  loss: 0.0485  decode.loss_ce: 0.0324  decode.acc_seg: 98.6376  aux.loss_ce: 0.0161  aux.acc_seg: 98.2006
+2023/06/16 14:34:53 - mmengine - INFO - Iter(train) [ 7200/20000]  lr: 6.7255e-03  eta: 1:47:54  time: 0.5044  data_time: 0.0059  memory: 5933  loss: 0.0540  decode.loss_ce: 0.0350  decode.acc_seg: 98.6087  aux.loss_ce: 0.0190  aux.acc_seg: 98.1533
+2023/06/16 14:36:34 - mmengine - INFO - Iter(train) [ 7400/20000]  lr: 6.6322e-03  eta: 1:46:12  time: 0.5046  data_time: 0.0057  memory: 5933  loss: 0.0410  decode.loss_ce: 0.0277  decode.acc_seg: 98.6532  aux.loss_ce: 0.0133  aux.acc_seg: 98.3615
+2023/06/16 14:38:15 - mmengine - INFO - Iter(train) [ 7600/20000]  lr: 6.5388e-03  eta: 1:44:30  time: 0.5044  data_time: 0.0058  memory: 5933  loss: 0.0514  decode.loss_ce: 0.0331  decode.acc_seg: 98.7472  aux.loss_ce: 0.0182  aux.acc_seg: 98.6022
+2023/06/16 14:39:56 - mmengine - INFO - Iter(train) [ 7800/20000]  lr: 6.4453e-03  eta: 1:42:49  time: 0.5051  data_time: 0.0062  memory: 5933  loss: 0.0492  decode.loss_ce: 0.0327  decode.acc_seg: 98.6995  aux.loss_ce: 0.0165  aux.acc_seg: 98.4070
+2023/06/16 14:41:37 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:41:37 - mmengine - INFO - Iter(train) [ 8000/20000]  lr: 6.3516e-03  eta: 1:41:08  time: 0.5038  data_time: 0.0056  memory: 5933  loss: 0.0438  decode.loss_ce: 0.0291  decode.acc_seg: 98.5375  aux.loss_ce: 0.0147  aux.acc_seg: 98.2487
+2023/06/16 14:41:37 - mmengine - INFO - Saving checkpoint at 8000 iterations
+2023/06/16 14:41:38 - mmengine - INFO - per class results:
+2023/06/16 14:41:38 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 96.28 | 97.21 |
+|   green    | 94.86 | 97.97 |
+|   white    | 82.31 |  94.4 |
+| seed-black | 82.79 | 91.55 |
+| seed-white | 62.97 | 77.69 |
+| Unlabeled  | 35.08 | 47.74 |
++------------+-------+-------+
+2023/06/16 14:41:38 - mmengine - INFO - Iter(val) [11/11]    aAcc: 96.6300  mIoU: 75.7200  mAcc: 84.4300  data_time: 0.0064  time: 0.0518
+2023/06/16 14:43:19 - mmengine - INFO - Iter(train) [ 8200/20000]  lr: 6.2577e-03  eta: 1:39:26  time: 0.5034  data_time: 0.0057  memory: 5933  loss: 0.0424  decode.loss_ce: 0.0283  decode.acc_seg: 98.4355  aux.loss_ce: 0.0140  aux.acc_seg: 98.0756
+2023/06/16 14:45:00 - mmengine - INFO - Iter(train) [ 8400/20000]  lr: 6.1637e-03  eta: 1:37:44  time: 0.5043  data_time: 0.0056  memory: 5933  loss: 0.0443  decode.loss_ce: 0.0294  decode.acc_seg: 98.7872  aux.loss_ce: 0.0148  aux.acc_seg: 98.3803
+2023/06/16 14:46:41 - mmengine - INFO - Iter(train) [ 8600/20000]  lr: 6.0696e-03  eta: 1:36:03  time: 0.5058  data_time: 0.0066  memory: 5933  loss: 0.0566  decode.loss_ce: 0.0371  decode.acc_seg: 98.1093  aux.loss_ce: 0.0195  aux.acc_seg: 97.4060
+2023/06/16 14:48:22 - mmengine - INFO - Iter(train) [ 8800/20000]  lr: 5.9752e-03  eta: 1:34:21  time: 0.5035  data_time: 0.0055  memory: 5933  loss: 0.0466  decode.loss_ce: 0.0309  decode.acc_seg: 98.6923  aux.loss_ce: 0.0157  aux.acc_seg: 98.1275
+2023/06/16 14:50:02 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:50:02 - mmengine - INFO - Iter(train) [ 9000/20000]  lr: 5.8807e-03  eta: 1:32:40  time: 0.5038  data_time: 0.0057  memory: 5933  loss: 0.0445  decode.loss_ce: 0.0301  decode.acc_seg: 98.6058  aux.loss_ce: 0.0144  aux.acc_seg: 98.3975
+2023/06/16 14:51:43 - mmengine - INFO - Iter(train) [ 9200/20000]  lr: 5.7860e-03  eta: 1:30:59  time: 0.5036  data_time: 0.0054  memory: 5933  loss: 0.0508  decode.loss_ce: 0.0338  decode.acc_seg: 98.6551  aux.loss_ce: 0.0170  aux.acc_seg: 98.4084
+2023/06/16 14:53:24 - mmengine - INFO - Iter(train) [ 9400/20000]  lr: 5.6912e-03  eta: 1:29:17  time: 0.5038  data_time: 0.0057  memory: 5933  loss: 0.0494  decode.loss_ce: 0.0321  decode.acc_seg: 98.8521  aux.loss_ce: 0.0173  aux.acc_seg: 98.5921
+2023/06/16 14:55:05 - mmengine - INFO - Iter(train) [ 9600/20000]  lr: 5.5961e-03  eta: 1:27:36  time: 0.5040  data_time: 0.0059  memory: 5933  loss: 0.0480  decode.loss_ce: 0.0306  decode.acc_seg: 98.2942  aux.loss_ce: 0.0174  aux.acc_seg: 98.1952
+2023/06/16 14:56:46 - mmengine - INFO - Iter(train) [ 9800/20000]  lr: 5.5009e-03  eta: 1:25:55  time: 0.5036  data_time: 0.0057  memory: 5933  loss: 0.0425  decode.loss_ce: 0.0279  decode.acc_seg: 98.3780  aux.loss_ce: 0.0146  aux.acc_seg: 98.1243
+2023/06/16 14:58:27 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 14:58:27 - mmengine - INFO - Iter(train) [10000/20000]  lr: 5.4055e-03  eta: 1:24:13  time: 0.5036  data_time: 0.0056  memory: 5933  loss: 0.0408  decode.loss_ce: 0.0273  decode.acc_seg: 98.5191  aux.loss_ce: 0.0135  aux.acc_seg: 98.2878
+2023/06/16 14:58:27 - mmengine - INFO - Saving checkpoint at 10000 iterations
+2023/06/16 14:58:28 - mmengine - INFO - per class results:
+2023/06/16 14:58:28 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     |  96.3 |  97.3 |
+|   green    | 94.63 | 97.63 |
+|   white    | 82.43 | 94.15 |
+| seed-black | 82.09 | 91.32 |
+| seed-white | 62.74 | 79.07 |
+| Unlabeled  | 37.95 | 52.75 |
++------------+-------+-------+
+2023/06/16 14:58:28 - mmengine - INFO - Iter(val) [11/11]    aAcc: 96.5800  mIoU: 76.0200  mAcc: 85.3700  data_time: 0.0078  time: 0.0524
+2023/06/16 15:00:09 - mmengine - INFO - Iter(train) [10200/20000]  lr: 5.3099e-03  eta: 1:22:32  time: 0.5047  data_time: 0.0061  memory: 5933  loss: 0.0403  decode.loss_ce: 0.0259  decode.acc_seg: 98.8577  aux.loss_ce: 0.0143  aux.acc_seg: 98.6670
+2023/06/16 15:01:50 - mmengine - INFO - Iter(train) [10400/20000]  lr: 5.2141e-03  eta: 1:20:51  time: 0.5035  data_time: 0.0055  memory: 5933  loss: 0.0471  decode.loss_ce: 0.0295  decode.acc_seg: 98.4042  aux.loss_ce: 0.0177  aux.acc_seg: 98.1690
+2023/06/16 15:03:31 - mmengine - INFO - Iter(train) [10600/20000]  lr: 5.1181e-03  eta: 1:19:09  time: 0.5044  data_time: 0.0060  memory: 5933  loss: 0.0474  decode.loss_ce: 0.0305  decode.acc_seg: 98.6009  aux.loss_ce: 0.0168  aux.acc_seg: 98.3618
+2023/06/16 15:05:12 - mmengine - INFO - Iter(train) [10800/20000]  lr: 5.0219e-03  eta: 1:17:28  time: 0.5058  data_time: 0.0065  memory: 5933  loss: 0.0499  decode.loss_ce: 0.0331  decode.acc_seg: 98.3527  aux.loss_ce: 0.0168  aux.acc_seg: 98.0674
+2023/06/16 15:06:52 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:06:52 - mmengine - INFO - Iter(train) [11000/20000]  lr: 4.9255e-03  eta: 1:15:47  time: 0.5025  data_time: 0.0051  memory: 5933  loss: 0.0459  decode.loss_ce: 0.0309  decode.acc_seg: 98.6441  aux.loss_ce: 0.0150  aux.acc_seg: 98.2806
+2023/06/16 15:08:33 - mmengine - INFO - Iter(train) [11200/20000]  lr: 4.8289e-03  eta: 1:14:06  time: 0.5050  data_time: 0.0063  memory: 5933  loss: 0.0440  decode.loss_ce: 0.0296  decode.acc_seg: 98.3512  aux.loss_ce: 0.0143  aux.acc_seg: 98.0658
+2023/06/16 15:10:14 - mmengine - INFO - Iter(train) [11400/20000]  lr: 4.7321e-03  eta: 1:12:25  time: 0.5036  data_time: 0.0054  memory: 5933  loss: 0.0395  decode.loss_ce: 0.0265  decode.acc_seg: 98.8318  aux.loss_ce: 0.0130  aux.acc_seg: 98.7179
+2023/06/16 15:11:55 - mmengine - INFO - Iter(train) [11600/20000]  lr: 4.6350e-03  eta: 1:10:43  time: 0.5041  data_time: 0.0059  memory: 5933  loss: 0.0433  decode.loss_ce: 0.0289  decode.acc_seg: 98.7471  aux.loss_ce: 0.0144  aux.acc_seg: 98.6007
+2023/06/16 15:13:36 - mmengine - INFO - Iter(train) [11800/20000]  lr: 4.5377e-03  eta: 1:09:02  time: 0.5027  data_time: 0.0051  memory: 5933  loss: 0.0396  decode.loss_ce: 0.0263  decode.acc_seg: 98.9797  aux.loss_ce: 0.0133  aux.acc_seg: 98.8064
+2023/06/16 15:15:17 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:15:17 - mmengine - INFO - Iter(train) [12000/20000]  lr: 4.4402e-03  eta: 1:07:21  time: 0.5048  data_time: 0.0062  memory: 5933  loss: 0.0445  decode.loss_ce: 0.0298  decode.acc_seg: 98.2306  aux.loss_ce: 0.0148  aux.acc_seg: 97.9116
+2023/06/16 15:15:17 - mmengine - INFO - Saving checkpoint at 12000 iterations
+2023/06/16 15:15:18 - mmengine - INFO - per class results:
+2023/06/16 15:15:18 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 97.79 | 98.89 |
+|   green    | 95.27 | 97.74 |
+|   white    | 91.09 | 94.15 |
+| seed-black | 82.61 | 91.28 |
+| seed-white | 65.26 | 81.08 |
+| Unlabeled  | 47.66 | 51.77 |
++------------+-------+-------+
+2023/06/16 15:15:18 - mmengine - INFO - Iter(val) [11/11]    aAcc: 97.5500  mIoU: 79.9500  mAcc: 85.8200  data_time: 0.0078  time: 0.0524
+2023/06/16 15:16:59 - mmengine - INFO - Iter(train) [12200/20000]  lr: 4.3424e-03  eta: 1:05:40  time: 0.5041  data_time: 0.0057  memory: 5933  loss: 0.0409  decode.loss_ce: 0.0274  decode.acc_seg: 98.5563  aux.loss_ce: 0.0135  aux.acc_seg: 98.2741
+2023/06/16 15:18:40 - mmengine - INFO - Iter(train) [12400/20000]  lr: 4.2444e-03  eta: 1:03:59  time: 0.5051  data_time: 0.0064  memory: 5933  loss: 0.0406  decode.loss_ce: 0.0273  decode.acc_seg: 98.6786  aux.loss_ce: 0.0133  aux.acc_seg: 98.5055
+2023/06/16 15:20:21 - mmengine - INFO - Iter(train) [12600/20000]  lr: 4.1461e-03  eta: 1:02:17  time: 0.5031  data_time: 0.0055  memory: 5933  loss: 0.0462  decode.loss_ce: 0.0299  decode.acc_seg: 99.0148  aux.loss_ce: 0.0163  aux.acc_seg: 98.8824
+2023/06/16 15:22:01 - mmengine - INFO - Iter(train) [12800/20000]  lr: 4.0475e-03  eta: 1:00:36  time: 0.5064  data_time: 0.0069  memory: 5933  loss: 0.0427  decode.loss_ce: 0.0285  decode.acc_seg: 98.9374  aux.loss_ce: 0.0142  aux.acc_seg: 98.8403
+2023/06/16 15:23:42 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:23:42 - mmengine - INFO - Iter(train) [13000/20000]  lr: 3.9487e-03  eta: 0:58:55  time: 0.5025  data_time: 0.0051  memory: 5933  loss: 0.0413  decode.loss_ce: 0.0277  decode.acc_seg: 98.8229  aux.loss_ce: 0.0136  aux.acc_seg: 98.5773
+2023/06/16 15:25:23 - mmengine - INFO - Iter(train) [13200/20000]  lr: 3.8496e-03  eta: 0:57:14  time: 0.5020  data_time: 0.0050  memory: 5933  loss: 0.0429  decode.loss_ce: 0.0284  decode.acc_seg: 98.3867  aux.loss_ce: 0.0145  aux.acc_seg: 98.1485
+2023/06/16 15:27:04 - mmengine - INFO - Iter(train) [13400/20000]  lr: 3.7502e-03  eta: 0:55:33  time: 0.5029  data_time: 0.0052  memory: 5933  loss: 0.0412  decode.loss_ce: 0.0265  decode.acc_seg: 98.8554  aux.loss_ce: 0.0147  aux.acc_seg: 98.7513
+2023/06/16 15:28:45 - mmengine - INFO - Iter(train) [13600/20000]  lr: 3.6505e-03  eta: 0:53:52  time: 0.5062  data_time: 0.0067  memory: 5933  loss: 0.0400  decode.loss_ce: 0.0267  decode.acc_seg: 99.0646  aux.loss_ce: 0.0133  aux.acc_seg: 98.9073
+2023/06/16 15:30:26 - mmengine - INFO - Iter(train) [13800/20000]  lr: 3.5505e-03  eta: 0:52:11  time: 0.5049  data_time: 0.0061  memory: 5933  loss: 0.0395  decode.loss_ce: 0.0263  decode.acc_seg: 98.7578  aux.loss_ce: 0.0132  aux.acc_seg: 98.4300
+2023/06/16 15:32:07 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:32:07 - mmengine - INFO - Iter(train) [14000/20000]  lr: 3.4501e-03  eta: 0:50:30  time: 0.5056  data_time: 0.0065  memory: 5933  loss: 0.0396  decode.loss_ce: 0.0265  decode.acc_seg: 98.9884  aux.loss_ce: 0.0132  aux.acc_seg: 98.7202
+2023/06/16 15:32:07 - mmengine - INFO - Saving checkpoint at 14000 iterations
+2023/06/16 15:32:08 - mmengine - INFO - per class results:
+2023/06/16 15:32:08 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 95.81 |  96.9 |
+|   green    | 94.82 |  97.9 |
+|   white    | 78.78 |  94.0 |
+| seed-black | 81.95 | 89.98 |
+| seed-white | 64.91 | 81.26 |
+| Unlabeled  | 41.24 | 44.58 |
++------------+-------+-------+
+2023/06/16 15:32:08 - mmengine - INFO - Iter(val) [11/11]    aAcc: 96.3100  mIoU: 76.2500  mAcc: 84.1000  data_time: 0.0062  time: 0.0510
+2023/06/16 15:33:49 - mmengine - INFO - Iter(train) [14200/20000]  lr: 3.3495e-03  eta: 0:48:49  time: 0.5016  data_time: 0.0050  memory: 5933  loss: 0.0375  decode.loss_ce: 0.0250  decode.acc_seg: 99.1985  aux.loss_ce: 0.0125  aux.acc_seg: 99.0500
+2023/06/16 15:35:30 - mmengine - INFO - Iter(train) [14400/20000]  lr: 3.2485e-03  eta: 0:47:08  time: 0.5030  data_time: 0.0056  memory: 5933  loss: 0.0365  decode.loss_ce: 0.0244  decode.acc_seg: 98.9929  aux.loss_ce: 0.0122  aux.acc_seg: 98.7780
+2023/06/16 15:37:11 - mmengine - INFO - Iter(train) [14600/20000]  lr: 3.1471e-03  eta: 0:45:27  time: 0.5051  data_time: 0.0065  memory: 5933  loss: 0.0372  decode.loss_ce: 0.0248  decode.acc_seg: 98.7652  aux.loss_ce: 0.0124  aux.acc_seg: 98.6089
+2023/06/16 15:38:52 - mmengine - INFO - Iter(train) [14800/20000]  lr: 3.0453e-03  eta: 0:43:46  time: 0.5022  data_time: 0.0050  memory: 5933  loss: 0.0389  decode.loss_ce: 0.0258  decode.acc_seg: 98.8876  aux.loss_ce: 0.0131  aux.acc_seg: 98.7615
+2023/06/16 15:40:33 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:40:33 - mmengine - INFO - Iter(train) [15000/20000]  lr: 2.9432e-03  eta: 0:42:05  time: 0.5041  data_time: 0.0058  memory: 5933  loss: 0.0354  decode.loss_ce: 0.0233  decode.acc_seg: 98.9549  aux.loss_ce: 0.0121  aux.acc_seg: 98.8221
+2023/06/16 15:42:14 - mmengine - INFO - Iter(train) [15200/20000]  lr: 2.8406e-03  eta: 0:40:24  time: 0.5051  data_time: 0.0061  memory: 5933  loss: 0.0392  decode.loss_ce: 0.0259  decode.acc_seg: 99.0386  aux.loss_ce: 0.0133  aux.acc_seg: 98.7776
+2023/06/16 15:43:54 - mmengine - INFO - Iter(train) [15400/20000]  lr: 2.7376e-03  eta: 0:38:42  time: 0.5058  data_time: 0.0065  memory: 5933  loss: 0.0365  decode.loss_ce: 0.0242  decode.acc_seg: 99.1133  aux.loss_ce: 0.0124  aux.acc_seg: 99.0135
+2023/06/16 15:45:35 - mmengine - INFO - Iter(train) [15600/20000]  lr: 2.6342e-03  eta: 0:37:01  time: 0.5022  data_time: 0.0050  memory: 5933  loss: 0.0368  decode.loss_ce: 0.0243  decode.acc_seg: 99.2803  aux.loss_ce: 0.0125  aux.acc_seg: 99.1680
+2023/06/16 15:47:16 - mmengine - INFO - Iter(train) [15800/20000]  lr: 2.5303e-03  eta: 0:35:20  time: 0.5034  data_time: 0.0054  memory: 5933  loss: 0.0402  decode.loss_ce: 0.0266  decode.acc_seg: 98.8917  aux.loss_ce: 0.0135  aux.acc_seg: 98.6861
+2023/06/16 15:48:57 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:48:57 - mmengine - INFO - Iter(train) [16000/20000]  lr: 2.4259e-03  eta: 0:33:39  time: 0.5042  data_time: 0.0060  memory: 5933  loss: 0.0359  decode.loss_ce: 0.0239  decode.acc_seg: 98.7860  aux.loss_ce: 0.0120  aux.acc_seg: 98.5719
+2023/06/16 15:48:57 - mmengine - INFO - Saving checkpoint at 16000 iterations
+2023/06/16 15:48:58 - mmengine - INFO - per class results:
+2023/06/16 15:48:58 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 91.57 | 92.52 |
+|   green    | 94.97 | 97.93 |
+|   white    | 59.97 | 94.19 |
+| seed-black |  82.5 | 91.04 |
+| seed-white | 64.79 | 78.94 |
+| Unlabeled  | 43.06 | 45.91 |
++------------+-------+-------+
+2023/06/16 15:48:58 - mmengine - INFO - Iter(val) [11/11]    aAcc: 93.8100  mIoU: 72.8100  mAcc: 83.4200  data_time: 0.0076  time: 0.0526
+2023/06/16 15:50:39 - mmengine - INFO - Iter(train) [16200/20000]  lr: 2.3209e-03  eta: 0:31:58  time: 0.5042  data_time: 0.0064  memory: 5933  loss: 0.0348  decode.loss_ce: 0.0231  decode.acc_seg: 98.6846  aux.loss_ce: 0.0117  aux.acc_seg: 98.4271
+2023/06/16 15:52:20 - mmengine - INFO - Iter(train) [16400/20000]  lr: 2.2154e-03  eta: 0:30:17  time: 0.5033  data_time: 0.0052  memory: 5933  loss: 0.0343  decode.loss_ce: 0.0226  decode.acc_seg: 98.9072  aux.loss_ce: 0.0118  aux.acc_seg: 98.7205
+2023/06/16 15:54:01 - mmengine - INFO - Iter(train) [16600/20000]  lr: 2.1094e-03  eta: 0:28:36  time: 0.5051  data_time: 0.0063  memory: 5933  loss: 0.0333  decode.loss_ce: 0.0222  decode.acc_seg: 98.9621  aux.loss_ce: 0.0111  aux.acc_seg: 98.8347
+2023/06/16 15:55:42 - mmengine - INFO - Iter(train) [16800/20000]  lr: 2.0027e-03  eta: 0:26:55  time: 0.5038  data_time: 0.0060  memory: 5933  loss: 0.0346  decode.loss_ce: 0.0225  decode.acc_seg: 99.1320  aux.loss_ce: 0.0120  aux.acc_seg: 98.9273
+2023/06/16 15:57:23 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 15:57:23 - mmengine - INFO - Iter(train) [17000/20000]  lr: 1.8953e-03  eta: 0:25:14  time: 0.5051  data_time: 0.0066  memory: 5933  loss: 0.0352  decode.loss_ce: 0.0233  decode.acc_seg: 99.1529  aux.loss_ce: 0.0120  aux.acc_seg: 98.9444
+2023/06/16 15:59:04 - mmengine - INFO - Iter(train) [17200/20000]  lr: 1.7872e-03  eta: 0:23:33  time: 0.5041  data_time: 0.0059  memory: 5933  loss: 0.0391  decode.loss_ce: 0.0255  decode.acc_seg: 98.8406  aux.loss_ce: 0.0136  aux.acc_seg: 98.6395
+2023/06/16 16:00:45 - mmengine - INFO - Iter(train) [17400/20000]  lr: 1.6784e-03  eta: 0:21:52  time: 0.5055  data_time: 0.0062  memory: 5933  loss: 0.0379  decode.loss_ce: 0.0252  decode.acc_seg: 98.9804  aux.loss_ce: 0.0127  aux.acc_seg: 98.8088
+2023/06/16 16:02:25 - mmengine - INFO - Iter(train) [17600/20000]  lr: 1.5686e-03  eta: 0:20:11  time: 0.5042  data_time: 0.0058  memory: 5933  loss: 0.0364  decode.loss_ce: 0.0240  decode.acc_seg: 99.1073  aux.loss_ce: 0.0124  aux.acc_seg: 98.9053
+2023/06/16 16:04:06 - mmengine - INFO - Iter(train) [17800/20000]  lr: 1.4580e-03  eta: 0:18:30  time: 0.5043  data_time: 0.0061  memory: 5933  loss: 0.0325  decode.loss_ce: 0.0217  decode.acc_seg: 99.0119  aux.loss_ce: 0.0108  aux.acc_seg: 98.8389
+2023/06/16 16:05:47 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 16:05:47 - mmengine - INFO - Iter(train) [18000/20000]  lr: 1.3464e-03  eta: 0:16:49  time: 0.5061  data_time: 0.0071  memory: 5933  loss: 0.0394  decode.loss_ce: 0.0262  decode.acc_seg: 98.8032  aux.loss_ce: 0.0131  aux.acc_seg: 98.5715
+2023/06/16 16:05:47 - mmengine - INFO - Saving checkpoint at 18000 iterations
+2023/06/16 16:05:49 - mmengine - INFO - per class results:
+2023/06/16 16:05:49 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 96.86 |  97.9 |
+|   green    |  95.0 | 97.94 |
+|   white    | 84.84 | 94.16 |
+| seed-black | 81.97 | 90.44 |
+| seed-white | 65.21 |  80.4 |
+| Unlabeled  | 42.79 |  45.7 |
++------------+-------+-------+
+2023/06/16 16:05:49 - mmengine - INFO - Iter(val) [11/11]    aAcc: 96.9400  mIoU: 77.7800  mAcc: 84.4200  data_time: 0.0062  time: 0.0513
+2023/06/16 16:07:29 - mmengine - INFO - Iter(train) [18200/20000]  lr: 1.2336e-03  eta: 0:15:08  time: 0.5038  data_time: 0.0057  memory: 5933  loss: 0.0390  decode.loss_ce: 0.0250  decode.acc_seg: 98.9866  aux.loss_ce: 0.0140  aux.acc_seg: 98.8563
+2023/06/16 16:09:10 - mmengine - INFO - Iter(train) [18400/20000]  lr: 1.1196e-03  eta: 0:13:27  time: 0.5035  data_time: 0.0055  memory: 5933  loss: 0.0363  decode.loss_ce: 0.0238  decode.acc_seg: 98.8549  aux.loss_ce: 0.0125  aux.acc_seg: 98.6156
+2023/06/16 16:10:51 - mmengine - INFO - Iter(train) [18600/20000]  lr: 1.0042e-03  eta: 0:11:46  time: 0.5034  data_time: 0.0057  memory: 5933  loss: 0.0373  decode.loss_ce: 0.0247  decode.acc_seg: 99.0518  aux.loss_ce: 0.0126  aux.acc_seg: 98.8228
+2023/06/16 16:12:32 - mmengine - INFO - Iter(train) [18800/20000]  lr: 8.8703e-04  eta: 0:10:05  time: 0.5059  data_time: 0.0065  memory: 5933  loss: 0.0350  decode.loss_ce: 0.0233  decode.acc_seg: 98.9044  aux.loss_ce: 0.0117  aux.acc_seg: 98.7738
+2023/06/16 16:14:13 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 16:14:13 - mmengine - INFO - Iter(train) [19000/20000]  lr: 7.6793e-04  eta: 0:08:24  time: 0.5054  data_time: 0.0064  memory: 5933  loss: 0.0353  decode.loss_ce: 0.0236  decode.acc_seg: 98.8412  aux.loss_ce: 0.0118  aux.acc_seg: 98.6340
+2023/06/16 16:15:54 - mmengine - INFO - Iter(train) [19200/20000]  lr: 6.4640e-04  eta: 0:06:43  time: 0.5054  data_time: 0.0066  memory: 5933  loss: 0.0339  decode.loss_ce: 0.0226  decode.acc_seg: 99.0495  aux.loss_ce: 0.0113  aux.acc_seg: 98.8785
+2023/06/16 16:17:35 - mmengine - INFO - Iter(train) [19400/20000]  lr: 5.2176e-04  eta: 0:05:02  time: 0.5068  data_time: 0.0074  memory: 5933  loss: 0.0357  decode.loss_ce: 0.0238  decode.acc_seg: 98.6268  aux.loss_ce: 0.0119  aux.acc_seg: 98.3541
+2023/06/16 16:19:16 - mmengine - INFO - Iter(train) [19600/20000]  lr: 3.9281e-04  eta: 0:03:21  time: 0.5051  data_time: 0.0061  memory: 5933  loss: 0.0341  decode.loss_ce: 0.0224  decode.acc_seg: 98.9363  aux.loss_ce: 0.0117  aux.acc_seg: 98.7397
+2023/06/16 16:20:57 - mmengine - INFO - Iter(train) [19800/20000]  lr: 2.5691e-04  eta: 0:01:40  time: 0.5038  data_time: 0.0056  memory: 5933  loss: 0.0342  decode.loss_ce: 0.0227  decode.acc_seg: 98.8987  aux.loss_ce: 0.0115  aux.acc_seg: 98.7167
+2023/06/16 16:22:38 - mmengine - INFO - Exp name: pspnet_r50-d8_4xb4-320k_coco-stuff164k-512x512-water_20230616_133351
+2023/06/16 16:22:38 - mmengine - INFO - Iter(train) [20000/20000]  lr: 1.0000e-04  eta: 0:00:00  time: 0.5051  data_time: 0.0060  memory: 5933  loss: 0.0340  decode.loss_ce: 0.0226  decode.acc_seg: 99.0314  aux.loss_ce: 0.0113  aux.acc_seg: 98.9006
+2023/06/16 16:22:38 - mmengine - INFO - Saving checkpoint at 20000 iterations
+2023/06/16 16:22:39 - mmengine - INFO - per class results:
+2023/06/16 16:22:39 - mmengine - INFO - 
++------------+-------+-------+
+|   Class    |  IoU  |  Acc  |
++------------+-------+-------+
+|    red     | 95.44 | 96.46 |
+|   green    | 95.05 | 97.92 |
+|   white    | 76.16 | 94.04 |
+| seed-black | 82.68 |  91.1 |
+| seed-white | 63.79 | 79.13 |
+| Unlabeled  | 43.17 | 45.48 |
++------------+-------+-------+
+2023/06/16 16:22:39 - mmengine - INFO - Iter(val) [11/11]    aAcc: 96.1200  mIoU: 76.0500  mAcc: 84.0200  data_time: 0.0063  time: 0.0510
